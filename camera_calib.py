@@ -36,4 +36,4 @@ ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.sh
 
 undistored=cv2.undistort(img,mtx,dist,None,mtx)
 
-np.save("camera_calibration",dist,mtx)
+np.save("camera_calibration",[dist,mtx])
