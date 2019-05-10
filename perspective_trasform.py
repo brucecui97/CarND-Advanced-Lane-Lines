@@ -10,7 +10,6 @@ img_size=(img.shape[1],img.shape[0])
 dist_coef,dist_mat=np.load("camera_calibration.npy",allow_pickle=True)
 img=cv2.undistort(img,dist_mat,dist_coef,None,dist_mat)
 
-
 src=np.array([[250,685],[595,446],[685,446],[1062,685]],np.float32)
 
 plt.imshow(img)
@@ -20,8 +19,7 @@ plt.imshow(img)
 # plt.plot(src[2][0],src[2][1],'.')
 # plt.plot(src[3][0],src[3][1],'.')
 # =============================================================================
-
-offset=30
+offset=40
 dst=np.array([
         [offset,img_size[1]-offset],
         [offset,offset],
@@ -29,7 +27,12 @@ dst=np.array([
         [img_size[0]-offset,img_size[1]-offset]
         ], np.float32)
 
-mat_perspectiveT = cv2.getPerspectiveTransform(src, dst)
+mat_persp_transform = cv2.getPerspectiveTransform(src, dst)
 
-warped = cv2.warpPerspective(img, mat_perspectiveT, img_size)
+warped = cv2.warpPerspective(img, mat_persp_transform, img_size)
 plt.imshow(warped)
+
+np.save("mat_persp_transform",mat_persp_transform)
+
+
+

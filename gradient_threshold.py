@@ -64,12 +64,15 @@ def dir_threshold(img, sobel_kernel=3, thresh=(0, np.pi/2)):
     # Return the binary image
     return binary_output
 
-
-img=cv2.cvtColor(cv2.imread(images[1]),cv2.COLOR_BGR2RGB)
-
-binary_sobelx=abs_sobel_thresh(img,'x',30,180)
-binary_sobely=abs_sobel_thresh(img,'y',20,100)
-binary_direction=dir_threshold(img,3,(-np.pi/2.5,np.pi/2.5))
-combined=np.zeros_like(binary_sobelx)
-combined[(binary_sobelx==1) & (binary_direction==1)]=1
-plt.imshow(combined)
+# =============================================================================
+# 
+# img=cv2.cvtColor(cv2.imread(images[1]),cv2.COLOR_BGR2RGB)
+# 
+# binary_sobelx=abs_sobel_thresh(img,'x',30,180)
+# binary_sobely=abs_sobel_thresh(img,'y',20,100)
+# binary_direction=dir_threshold(img,3,(-np.pi/2.5,np.pi/2.5))
+# combined=np.zeros_like(binary_sobelx)
+# combined[(binary_sobelx==1) & (binary_direction==1)]=1
+# plt.imshow(combined)
+# 
+# =============================================================================
