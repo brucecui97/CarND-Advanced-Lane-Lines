@@ -12,9 +12,9 @@ import glob
 images=glob.glob("/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/test_images/str*.jpg")
 
 
-def abs_sobel_thresh(img, orient='x', thresh_min=0, thresh_max=255):
+def abs_sobel_thresh(gray, orient='x', thresh_min=0, thresh_max=255):
     # Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    #gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     # Apply x or y gradient with the OpenCV Sobel() function
     # and take the absolute value
     if orient == 'x':
@@ -31,9 +31,9 @@ def abs_sobel_thresh(img, orient='x', thresh_min=0, thresh_max=255):
     # Return the result
     return binary_output
 
-def mag_thresh(img, sobel_kernel=3, mag_thresh=(0, 255)):
+def mag_thresh(gray, sobel_kernel=3, mag_thresh=(0, 255)):
     # Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    #gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     # Take both Sobel x and y gradients
     sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
     sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
@@ -49,9 +49,9 @@ def mag_thresh(img, sobel_kernel=3, mag_thresh=(0, 255)):
     # Return the binary image
     return binary_output
 
-def dir_threshold(img, sobel_kernel=3, thresh=(0, np.pi/2)):
+def dir_threshold(gray, sobel_kernel=3, thresh=(0, np.pi/2)):
     # Grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    #gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     # Calculate the x and y gradients
     sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
     sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)

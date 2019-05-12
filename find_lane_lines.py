@@ -8,7 +8,7 @@ from gradient_threshold import abs_sobel_thresh, mag_thresh, dir_threshold
 
 images = glob.glob(
     "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/test_images/*.jpg")
-img_read = cv2.cvtColor(cv2.imread(images[3]), cv2.COLOR_BGR2RGB)
+img_read = cv2.cvtColor(cv2.imread(images[7]), cv2.COLOR_BGR2RGB)
 
 dist_coef, dist_mat = np.load("camera_calibration.npy", allow_pickle=True)
 persp_transform_mat = np.load("mat_persp_transform.npy", allow_pickle=True)
@@ -17,16 +17,40 @@ persp_transform_mat_inv = np.load("mat_persp_transform_back.npy", allow_pickle=T
 img_undistort = cv2.undistort(img_read, dist_mat, dist_coef, None, dist_mat)
 img_size = (img_undistort.shape[1], img_undistort.shape[0])
 
-binary_sobelx = abs_sobel_thresh(img_undistort, 'x', 30, 180)
-binary_sobely = abs_sobel_thresh(img_undistort, 'y', 20, 100)
-binary_direction = dir_threshold(img_undistort, 3, (-np.pi / 2.5, np.pi / 2.5))
+#do operations on image
+
+#first create a better version to extract lines than gray image
+hls = cv2.cvtColor(img_undistort, cv2.COLOR_RGB2HLS)
+h = hls[:,:,0]
+l = hls[:,:,1]
+s = hls[:,:,2]
+
+# =============================================================================
+# f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20,10))
+# ax1.set_title('Standardized image')
+# ax1.imshow(img_undistort)
+# ax2.set_title('H channel')
+# ax2.imshow(h, cmap='gray')
+# ax3.set_title('L channel')
+# ax3.imshow(l, cmap='gray')
+# ax4.set_title('S channel')
+# ax4.imshow(s, cmap='gray')
+#
+# =============================================================================
+
+binary_sobelx = abs_sobel_thresh(s, 'x', 30, 180)
+binary_sobely = abs_sobel_thresh(s, 'y', 20, 100)
+binary_direction = dir_threshold(s, 3, (-np.pi / 2.5, np.pi / 2.5))
 
 img_binary = np.zeros_like(binary_sobelx)
-img_binary[(binary_sobelx == 1) & (binary_direction == 1)] = 1
+img_binary[(binary_sobelx == 1) & (binary_direction == 1) | ( (binary_sobelx == 1) & (l>200))] = 1
+
+#plt.imshow(img_binary)
 
 img_bird_eye_warped = cv2.warpPerspective(
     img_binary, persp_transform_mat, img_size)
 
+#plt.imshow(img_bird_eye_warped)
 
 def hist(img):
     # Grab only the bottom half of the image
