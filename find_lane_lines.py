@@ -6,9 +6,14 @@ import matplotlib.pyplot as plt
 import glob
 from gradient_threshold import abs_sobel_thresh, mag_thresh, dir_threshold
 
+# =============================================================================
+# images = glob.glob(
+#     "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/test_images/*.jpg")
+# =============================================================================
 images = glob.glob(
-    "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/test_images/*.jpg")
-img_read = cv2.cvtColor(cv2.imread(images[7]), cv2.COLOR_BGR2RGB)
+    "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/frame0.jpg")
+img_read = cv2.cvtColor(cv2.imread(images[0]), cv2.COLOR_BGR2RGB)
+
 
 dist_coef, dist_mat = np.load("camera_calibration.npy", allow_pickle=True)
 persp_transform_mat = np.load("mat_persp_transform.npy", allow_pickle=True)
@@ -220,10 +225,10 @@ def fit_polynomial(binary_warped):
 #     plt.plot(right_fitx, ploty, color='yellow')
 # =============================================================================
 
-    return out_img, left_fit, right_fit, ploty
+    return out_img, left_fit, right_fit, ploty ,left_fitx, right_fitx
 
 
-out_img, left_fit, right_fit, ploty = fit_polynomial(img_bird_eye_warped)
+out_img, left_fit, right_fit, ploty ,left_fitx, right_fitx = fit_polynomial(img_bird_eye_warped)
 
 plt.imshow(out_img)
 
@@ -374,10 +379,14 @@ cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
 newwarp = cv2.warpPerspective(color_warp, persp_transform_mat_inv, (img_read.shape[1], img_read.shape[0])) 
 # Combine the result with the original image
 result = cv2.addWeighted(img_undistort, 1, newwarp, 0.3, 0)
-plt.imshow(result)
+#plt.imshow(result)
 
 
 def process_image(img_read):
+    
+    global flag, out_img, left_fit, right_fit, ploty ,left_fitx, right_fitx
+    flag=0
+    
     img_undistort = cv2.undistort(img_read, dist_mat, dist_coef, None, dist_mat)
     img_size = (img_undistort.shape[1], img_undistort.shape[0])
     
@@ -434,8 +443,14 @@ def process_image(img_read):
     
     left_lane_inds = []
     right_lane_inds = []
-    out_img, left_fit, right_fit, ploty = fit_polynomial(img_bird_eye_warped)
-
+    
+    try:
+        result, left_fitx, right_fitx, ploty = search_around_poly(img_bird_eye_warped)
+    
+    except:
+        pass
+    
+    print(flag)
     img_bird_eye_warped_zero = np.zeros_like(img_bird_eye_warped).astype(np.uint8)
     color_warp = np.dstack((img_bird_eye_warped_zero, img_bird_eye_warped_zero, img_bird_eye_warped_zero))
     
@@ -457,3 +472,30 @@ def process_image(img_read):
 #
 # img_bird_eye_warped[ploty_pix,left_pix]=[0]
 # =============================================================================
+plt.imshow(process_image(img_read))
+from moviepy.editor import VideoFileClip
+from IPython.display import HTML
+
+# =============================================================================
+# import cv2
+# vidcap = cv2.VideoCapture('project_video.mp4')
+# success,image = vidcap.read()
+# count = 0
+# while success:
+#   cv2.imwrite("frame%d.jpg" % count, image)     # save frame as JPEG file      
+#   success,image = vidcap.read()
+#   print('Read a new frame: ', success)
+#   count += 1
+# =============================================================================
+
+
+vid_output = 'project_video_out.mp4'
+## To speed up the testing process you may want to try your pipeline on a shorter subclip of the video
+## To do so add .subclip(start_second,end_second) to the end of the line below
+## Where start_second and end_second are integer values representing the start and end of the subclip
+## You may also uncomment the following line for a subclip of the first 5 seconds
+
+clip1 = VideoFileClip("project_video.mp4")
+white_clip = clip1.fl_image(process_image) #NOTE: this function expects color images!!
+%time white_clip.write_videofile(vid_output, audio=False)
+
