@@ -371,11 +371,87 @@ pts = np.hstack((pts_left, pts_right))
 cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
 
 # Warp the blank back to original image space using inverse perspective matrix (Minv)
-newwarp = cv2.warpPerspective(color_warp, persp_transform_mat_inv, (img.shape[1], img.shape[0])) 
+newwarp = cv2.warpPerspective(color_warp, persp_transform_mat_inv, (img_read.shape[1], img_read.shape[0])) 
 # Combine the result with the original image
 result = cv2.addWeighted(img_undistort, 1, newwarp, 0.3, 0)
 plt.imshow(result)
 
+
+def process_image(img_read):
+    img_undistort = cv2.undistort(img_read, dist_mat, dist_coef, None, dist_mat)
+    img_size = (img_undistort.shape[1], img_undistort.shape[0])
+    
+    #do operations on image
+    
+    #first create a better version to extract lines than gray image
+    hls = cv2.cvtColor(img_undistort, cv2.COLOR_RGB2HLS)
+    h = hls[:,:,0]
+    l = hls[:,:,1]
+    s = hls[:,:,2]
+    
+    binary_sobelx = abs_sobel_thresh(s, 'x', 30, 180)
+    binary_sobely = abs_sobel_thresh(s, 'y', 20, 100)
+    binary_direction = dir_threshold(s, 3, (-np.pi / 2.5, np.pi / 2.5))
+    
+    img_binary = np.zeros_like(binary_sobelx)
+    img_binary[(binary_sobelx == 1) & (binary_direction == 1) | ( (binary_sobelx == 1) & (l>200))] = 1
+    
+    #plt.imshow(img_binary)
+    
+    img_bird_eye_warped = cv2.warpPerspective(
+        img_binary, persp_transform_mat, img_size)
+
+    histogram = np.sum(
+        img_bird_eye_warped[img_bird_eye_warped.shape[0] // 2:, :], axis=0)
+    # Create an output image to draw on and visualize the result
+    out_img = np.dstack(
+        (img_bird_eye_warped,
+         img_bird_eye_warped,
+         img_bird_eye_warped)) * 255
+    # Find the peak of the left and right halves of the histogram
+    # These will be the starting point for the left and right lines
+    midpoint = np.int(histogram.shape[0] // 2)
+    leftx_base = np.argmax(histogram[:midpoint])
+    rightx_base = np.argmax(histogram[midpoint:]) + midpoint
+    
+    # HYPERPARAMETERS
+    # Choose the number of sliding windows
+    nwindows = 9
+    # Set the width of the windows +/- margin
+    margin = 100
+    # Set minimum number of pixels found to recenter window
+    minpix = 50
+    
+    window_height = np.int(img_bird_eye_warped.shape[0] // nwindows)
+    
+    
+    nonzero = img_bird_eye_warped.nonzero()
+    nonzeroy = np.array(nonzero[0])
+    nonzerox = np.array(nonzero[1])
+    
+    leftx_current = leftx_base
+    rightx_current = rightx_base
+    
+    left_lane_inds = []
+    right_lane_inds = []
+    out_img, left_fit, right_fit, ploty = fit_polynomial(img_bird_eye_warped)
+
+    img_bird_eye_warped_zero = np.zeros_like(img_bird_eye_warped).astype(np.uint8)
+    color_warp = np.dstack((img_bird_eye_warped_zero, img_bird_eye_warped_zero, img_bird_eye_warped_zero))
+    
+    # Recast the x and y points into usable format for cv2.fillPoly()
+    pts_left = np.array([np.transpose(np.vstack([left_fitx, ploty]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fitx, ploty])))])
+    pts = np.hstack((pts_left, pts_right))
+    
+    # Draw the lane onto the warped blank image
+    cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
+    
+    # Warp the blank back to original image space using inverse perspective matrix (Minv)
+    newwarp = cv2.warpPerspective(color_warp, persp_transform_mat_inv, (img_read.shape[1], img_read.shape[0])) 
+    # Combine the result with the original image
+    result = cv2.addWeighted(img_undistort, 1, newwarp, 0.3, 0)
+    return result
 # =============================================================================
 # b=np.dstack((img_bird_eye_warped,img_bird_eye_warped,img_bird_eye_warped))
 #
