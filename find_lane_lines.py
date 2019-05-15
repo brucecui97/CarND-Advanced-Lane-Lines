@@ -11,7 +11,7 @@ from gradient_threshold import abs_sobel_thresh, mag_thresh, dir_threshold
 #     "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/test_images/*.jpg")
 # =============================================================================
 images = glob.glob(
-    "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/frame614.jpg")
+    "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/frame0.jpg")
 img_read = cv2.cvtColor(cv2.imread(images[0]), cv2.COLOR_BGR2RGB)
 
 
@@ -30,15 +30,17 @@ h = hls[:,:,0]
 l = hls[:,:,1]
 s = hls[:,:,2]
 
-f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20,10))
-ax1.set_title('Standardized image')
-ax1.imshow(img_undistort)
-ax2.set_title('H channel')
-ax2.imshow(h, cmap='gray')
-ax3.set_title('L channel')
-ax3.imshow(l, cmap='gray')
-ax4.set_title('S channel')
-ax4.imshow(s, cmap='gray')
+# =============================================================================
+# f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20,10))
+# ax1.set_title('Standardized image')
+# ax1.imshow(img_undistort)
+# ax2.set_title('H channel')
+# ax2.imshow(h, cmap='gray')
+# ax3.set_title('L channel')
+# ax3.imshow(l, cmap='gray')
+# ax4.set_title('S channel')
+# ax4.imshow(s, cmap='gray')
+# =============================================================================
 
 
 binary_sobelx = abs_sobel_thresh(s, 'x', 20, 100)
@@ -383,11 +385,13 @@ newwarp = cv2.warpPerspective(color_warp, persp_transform_mat_inv, (img_read.sha
 result = cv2.addWeighted(img_undistort, 1, newwarp, 0.3, 0)
 plt.imshow(result)
 
+left_fitx_list=np.array([left_fitx,left_fitx,left_fitx,left_fitx,left_fitx])
+right_fitx_list=np.array([right_fitx,right_fitx,right_fitx,right_fitx,right_fitx])
 
 def process_image(img_read):
     
-    global flag, out_img, left_fit, right_fit, ploty ,left_fitx, right_fitx
-    flag=0
+    global out_img, left_fit, right_fit, ploty ,left_fitx, right_fitx ,left_fitx_list ,right_fitx_list
+
     
     img_undistort = cv2.undistort(img_read, dist_mat, dist_coef, None, dist_mat)
     img_size = (img_undistort.shape[1], img_undistort.shape[0])
@@ -452,12 +456,20 @@ def process_image(img_read):
     right_lane_inds = []
     
     try:
-        result, left_fitx, right_fitx, ploty = search_around_poly(img_bird_eye_warped)
+        result, left_fitx1, right_fitx1, ploty = search_around_poly(img_bird_eye_warped)
+        
+        left_fitx_list=np.append(left_fitx_list,np.array([left_fitx1]),axis=0)
+        right_fitx_list=np.append(right_fitx_list,np.array([right_fitx1]),axis=0)
+        
+        left_fitx_list=left_fitx_list[1:,:]
+        right_fitx_list=right_fitx_list[1:,:]
     
+       
     except:
         pass
     
-    print(flag)
+    left_fitx,right_fitx=(left_fitx_list.mean(axis=0),right_fitx_list.mean(axis=0))
+    
     img_bird_eye_warped_zero = np.zeros_like(img_bird_eye_warped).astype(np.uint8)
     color_warp = np.dstack((img_bird_eye_warped_zero, img_bird_eye_warped_zero, img_bird_eye_warped_zero))
     
@@ -481,14 +493,29 @@ def process_image(img_read):
 # =============================================================================
 #
 
-plt.imshow(process_image(img_read))
+result=process_image(img_read)
+
+font                   = cv2.FONT_HERSHEY_SIMPLEX
+bottomLeftCornerOfText = (10,100)
+fontScale              = 1.5
+fontColor              = (0,0,0)
+lineType               = 2
+
+cv2.putText(result,'Curvature is'+str(measure_curvature_real()), 
+    bottomLeftCornerOfText, 
+    font, 
+    fontScale,
+    fontColor,
+    lineType)
+
+plt.imshow(result)
+
+
+
 
 
 
 # =============================================================================
-# from moviepy.editor import VideoFileClip
-# from IPython.display import HTML
-# 
 # import cv2
 # vidcap = cv2.VideoCapture('project_video.mp4')
 # success,image = vidcap.read()
@@ -499,15 +526,6 @@ plt.imshow(process_image(img_read))
 #   print('Read a new frame: ', success)
 #   count += 1
 # 
-# 
-# vid_output = 'project_video_out.mp4'
-# ## To speed up the testing process you may want to try your pipeline on a shorter subclip of the video
-# ## To do so add .subclip(start_second,end_second) to the end of the line below
-# ## Where start_second and end_second are integer values representing the start and end of the subclip
-# ## You may also uncomment the following line for a subclip of the first 5 seconds
-# 
-# clip1 = VideoFileClip("project_video.mp4")
-# white_clip = clip1.fl_image(process_image) #NOTE: this function expects color images!!
-# %time white_clip.write_videofile(vid_output, audio=False)
 # =============================================================================
+
 

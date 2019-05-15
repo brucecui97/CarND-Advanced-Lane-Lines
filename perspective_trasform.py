@@ -3,14 +3,14 @@ import cv2
 import matplotlib.pyplot as plt
 import glob
 
-images=glob.glob("/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/test_images/*.jpg")
-img=cv2.cvtColor(cv2.imread(images[4]),cv2.COLOR_BGR2RGB)
+images=glob.glob("/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/frame1040.jpg")
+img=cv2.cvtColor(cv2.imread(images[0]),cv2.COLOR_BGR2RGB)
 img_size=(img.shape[1],img.shape[0])
 
 dist_coef,dist_mat=np.load("camera_calibration.npy",allow_pickle=True)
 img=cv2.undistort(img,dist_mat,dist_coef,None,dist_mat)
 
-src=np.array([[250,685],[580,446],[730,446],[1080,685]],np.float32)
+src=np.array([[250,685],[590,460],[755,460],[1110,685]],np.float32)
 
 plt.imshow(img)
 plt.plot(src[0][0],src[0][1],'.')
