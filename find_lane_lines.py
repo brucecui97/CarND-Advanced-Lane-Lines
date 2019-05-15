@@ -11,7 +11,7 @@ from gradient_threshold import abs_sobel_thresh, mag_thresh, dir_threshold
 #     "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/test_images/*.jpg")
 # =============================================================================
 images = glob.glob(
-    "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/frame0.jpg")
+    "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/frame614.jpg")
 img_read = cv2.cvtColor(cv2.imread(images[0]), cv2.COLOR_BGR2RGB)
 
 
@@ -30,27 +30,29 @@ h = hls[:,:,0]
 l = hls[:,:,1]
 s = hls[:,:,2]
 
-# =============================================================================
-# f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20,10))
-# ax1.set_title('Standardized image')
-# ax1.imshow(img_undistort)
-# ax2.set_title('H channel')
-# ax2.imshow(h, cmap='gray')
-# ax3.set_title('L channel')
-# ax3.imshow(l, cmap='gray')
-# ax4.set_title('S channel')
-# ax4.imshow(s, cmap='gray')
-#
-# =============================================================================
+f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20,10))
+ax1.set_title('Standardized image')
+ax1.imshow(img_undistort)
+ax2.set_title('H channel')
+ax2.imshow(h, cmap='gray')
+ax3.set_title('L channel')
+ax3.imshow(l, cmap='gray')
+ax4.set_title('S channel')
+ax4.imshow(s, cmap='gray')
 
-binary_sobelx = abs_sobel_thresh(s, 'x', 30, 180)
+
+binary_sobelx = abs_sobel_thresh(s, 'x', 20, 100)
 binary_sobely = abs_sobel_thresh(s, 'y', 20, 100)
 binary_direction = dir_threshold(s, 3, (-np.pi / 2.5, np.pi / 2.5))
 
-img_binary = np.zeros_like(binary_sobelx)
-img_binary[(binary_sobelx == 1) & (binary_direction == 1) | ( (binary_sobelx == 1) & (l>200))] = 1
+criteria1=(binary_sobelx == 1) & (binary_direction == 1)
+criteria2=(binary_sobely == 1) & (binary_direction == 1)
+criteria3=(h>=140) &(h<=180)& (l>=190)&(l<=240)&(s<=120)
 
-#plt.imshow(img_binary)
+img_binary = np.zeros_like(binary_sobelx)
+img_binary[criteria1 | criteria2 | criteria3] = 1
+
+plt.imshow(img_binary)
 
 img_bird_eye_warped = cv2.warpPerspective(
     img_binary, persp_transform_mat, img_size)
@@ -379,7 +381,7 @@ cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
 newwarp = cv2.warpPerspective(color_warp, persp_transform_mat_inv, (img_read.shape[1], img_read.shape[0])) 
 # Combine the result with the original image
 result = cv2.addWeighted(img_undistort, 1, newwarp, 0.3, 0)
-#plt.imshow(result)
+plt.imshow(result)
 
 
 def process_image(img_read):
@@ -398,12 +400,17 @@ def process_image(img_read):
     l = hls[:,:,1]
     s = hls[:,:,2]
     
-    binary_sobelx = abs_sobel_thresh(s, 'x', 30, 180)
+   
+    binary_sobelx = abs_sobel_thresh(s, 'x', 20, 100)
     binary_sobely = abs_sobel_thresh(s, 'y', 20, 100)
     binary_direction = dir_threshold(s, 3, (-np.pi / 2.5, np.pi / 2.5))
     
+    criteria1=(binary_sobelx == 1) & (binary_direction == 1)
+    criteria2=(binary_sobely == 1) & (binary_direction == 1)
+    criteria3=(h>=140) &(h<=180)& (l>=190)&(l<=240)&(s<=120)
+    
     img_binary = np.zeros_like(binary_sobelx)
-    img_binary[(binary_sobelx == 1) & (binary_direction == 1) | ( (binary_sobelx == 1) & (l>200))] = 1
+    img_binary[criteria1 | criteria2 | criteria3] = 1
     
     #plt.imshow(img_binary)
     
@@ -472,11 +479,16 @@ def process_image(img_read):
 #
 # img_bird_eye_warped[ploty_pix,left_pix]=[0]
 # =============================================================================
+#
+
 plt.imshow(process_image(img_read))
-from moviepy.editor import VideoFileClip
-from IPython.display import HTML
+
+
 
 # =============================================================================
+# from moviepy.editor import VideoFileClip
+# from IPython.display import HTML
+# 
 # import cv2
 # vidcap = cv2.VideoCapture('project_video.mp4')
 # success,image = vidcap.read()
@@ -486,16 +498,16 @@ from IPython.display import HTML
 #   success,image = vidcap.read()
 #   print('Read a new frame: ', success)
 #   count += 1
+# 
+# 
+# vid_output = 'project_video_out.mp4'
+# ## To speed up the testing process you may want to try your pipeline on a shorter subclip of the video
+# ## To do so add .subclip(start_second,end_second) to the end of the line below
+# ## Where start_second and end_second are integer values representing the start and end of the subclip
+# ## You may also uncomment the following line for a subclip of the first 5 seconds
+# 
+# clip1 = VideoFileClip("project_video.mp4")
+# white_clip = clip1.fl_image(process_image) #NOTE: this function expects color images!!
+# %time white_clip.write_videofile(vid_output, audio=False)
 # =============================================================================
-
-
-vid_output = 'project_video_out.mp4'
-## To speed up the testing process you may want to try your pipeline on a shorter subclip of the video
-## To do so add .subclip(start_second,end_second) to the end of the line below
-## Where start_second and end_second are integer values representing the start and end of the subclip
-## You may also uncomment the following line for a subclip of the first 5 seconds
-
-clip1 = VideoFileClip("project_video.mp4")
-white_clip = clip1.fl_image(process_image) #NOTE: this function expects color images!!
-%time white_clip.write_videofile(vid_output, audio=False)
 

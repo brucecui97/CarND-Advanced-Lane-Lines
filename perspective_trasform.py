@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import glob
 
 images=glob.glob("/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/test_images/*.jpg")
-img=cv2.cvtColor(cv2.imread(images[3]),cv2.COLOR_BGR2RGB)
+img=cv2.cvtColor(cv2.imread(images[4]),cv2.COLOR_BGR2RGB)
 img_size=(img.shape[1],img.shape[0])
 
 dist_coef,dist_mat=np.load("camera_calibration.npy",allow_pickle=True)
