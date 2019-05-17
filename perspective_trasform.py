@@ -3,7 +3,7 @@ import cv2
 import matplotlib.pyplot as plt
 import glob
 
-images=glob.glob("/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/frame1040.jpg")
+images=glob.glob("/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/frame925.jpg")
 img=cv2.cvtColor(cv2.imread(images[0]),cv2.COLOR_BGR2RGB)
 img_size=(img.shape[1],img.shape[0])
 

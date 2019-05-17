@@ -30,29 +30,28 @@ h = hls[:,:,0]
 l = hls[:,:,1]
 s = hls[:,:,2]
 
-# =============================================================================
-# f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20,10))
-# ax1.set_title('Standardized image')
-# ax1.imshow(img_undistort)
-# ax2.set_title('H channel')
-# ax2.imshow(h, cmap='gray')
-# ax3.set_title('L channel')
-# ax3.imshow(l, cmap='gray')
-# ax4.set_title('S channel')
-# ax4.imshow(s, cmap='gray')
-# =============================================================================
+f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20,10))
+ax1.set_title('Standardized image')
+ax1.imshow(img_undistort)
+ax2.set_title('H channel')
+ax2.imshow(h, cmap='gray')
+ax3.set_title('L channel')
+ax3.imshow(l, cmap='gray')
+ax4.set_title('S channel')
+ax4.imshow(s, cmap='gray')
 
 
 binary_sobelx = abs_sobel_thresh(s, 'x', 20, 100)
 binary_sobely = abs_sobel_thresh(s, 'y', 20, 100)
 binary_direction = dir_threshold(s, 3, (-np.pi / 2.5, np.pi / 2.5))
 
-criteria1=(binary_sobelx == 1) & (binary_direction == 1)
-criteria2=(binary_sobely == 1) & (binary_direction == 1)
+criteria1=(binary_sobelx == 1) & (binary_direction == 1) & (l>100)
+criteria2=(binary_sobely == 1) & (binary_direction == 1) & (l>100)
 criteria3=(h>=140) &(h<=180)& (l>=190)&(l<=240)&(s<=120)
+criteria4=(s<=200)
 
 img_binary = np.zeros_like(binary_sobelx)
-img_binary[criteria1 | criteria2 | criteria3] = 1
+img_binary[(criteria1 | criteria2 | criteria3) & criteria4] = 1
 
 plt.imshow(img_binary)
 
@@ -385,8 +384,8 @@ newwarp = cv2.warpPerspective(color_warp, persp_transform_mat_inv, (img_read.sha
 result = cv2.addWeighted(img_undistort, 1, newwarp, 0.3, 0)
 plt.imshow(result)
 
-left_fitx_list=np.array([left_fitx,left_fitx,left_fitx,left_fitx,left_fitx])
-right_fitx_list=np.array([right_fitx,right_fitx,right_fitx,right_fitx,right_fitx])
+left_fitx_list=np.array([left_fitx,left_fitx,left_fitx])
+right_fitx_list=np.array([right_fitx,right_fitx,right_fitx])
 
 def process_image(img_read):
     
@@ -409,12 +408,13 @@ def process_image(img_read):
     binary_sobely = abs_sobel_thresh(s, 'y', 20, 100)
     binary_direction = dir_threshold(s, 3, (-np.pi / 2.5, np.pi / 2.5))
     
-    criteria1=(binary_sobelx == 1) & (binary_direction == 1)
-    criteria2=(binary_sobely == 1) & (binary_direction == 1)
+    criteria1=(binary_sobelx == 1) & (binary_direction == 1) & (l>100)
+    criteria2=(binary_sobely == 1) & (binary_direction == 1) & (l>100)
     criteria3=(h>=140) &(h<=180)& (l>=190)&(l<=240)&(s<=120)
+    criteria4=(s<=200)
     
     img_binary = np.zeros_like(binary_sobelx)
-    img_binary[criteria1 | criteria2 | criteria3] = 1
+    img_binary[(criteria1 | criteria2 | criteria3) & criteria4] = 1
     
     #plt.imshow(img_binary)
     
@@ -497,11 +497,14 @@ result=process_image(img_read)
 
 font                   = cv2.FONT_HERSHEY_SIMPLEX
 bottomLeftCornerOfText = (10,100)
-fontScale              = 1.5
+fontScale              = 2
 fontColor              = (0,0,0)
 lineType               = 2
 
-cv2.putText(result,'Curvature is'+str(measure_curvature_real()), 
+curvature_left=int(measure_curvature_real()[0])
+curvature_right=int(measure_curvature_real()[1])
+
+cv2.putText(result,'Curvature (left,right)= ('+str(curvature_left)+','+str(curvature_right)+')', 
     bottomLeftCornerOfText, 
     font, 
     fontScale,
@@ -509,7 +512,6 @@ cv2.putText(result,'Curvature is'+str(measure_curvature_real()),
     lineType)
 
 plt.imshow(result)
-
 
 
 
