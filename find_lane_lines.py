@@ -224,8 +224,13 @@ def fit_polynomial(binary_warped):
 
     # Plots the left and right polynomials on the lane lines
 # =============================================================================
-#     plt.plot(left_fitx, ploty, color='yellow')
-#     plt.plot(right_fitx, ploty, color='yellow')
+    plt.plot(left_fitx, ploty, color='red')
+    plt.plot(right_fitx, ploty, color='red')
+    
+    picture=np.zeros_like(img_read)
+    picture[lefty.astype(int),leftx.astype(int)]=[255,255,255]
+    picture[righty.astype(int),rightx.astype(int)]=[255,255,255]
+    plt.imshow(picture)
 # =============================================================================
 
     return out_img, left_fit, right_fit, ploty ,left_fitx, right_fitx
@@ -485,6 +490,22 @@ def process_image(img_read):
     newwarp = cv2.warpPerspective(color_warp, persp_transform_mat_inv, (img_read.shape[1], img_read.shape[0])) 
     # Combine the result with the original image
     result = cv2.addWeighted(img_undistort, 1, newwarp, 0.3, 0)
+    
+    font                   = cv2.FONT_HERSHEY_SIMPLEX
+    bottomLeftCornerOfText = (10,100)
+    fontScale              = 2
+    fontColor              = (0,0,0)
+    lineType               = 2
+    
+    curvature_left=int(measure_curvature_real()[0])
+    curvature_right=int(measure_curvature_real()[1])
+    
+    cv2.putText(result,'Curvature (left,right)= ('+str(curvature_left)+','+str(curvature_right)+')', 
+        bottomLeftCornerOfText, 
+        font, 
+        fontScale,
+        fontColor,
+        lineType)
     return result
 # =============================================================================
 # b=np.dstack((img_bird_eye_warped,img_bird_eye_warped,img_bird_eye_warped))
@@ -495,21 +516,7 @@ def process_image(img_read):
 
 result=process_image(img_read)
 
-font                   = cv2.FONT_HERSHEY_SIMPLEX
-bottomLeftCornerOfText = (10,100)
-fontScale              = 2
-fontColor              = (0,0,0)
-lineType               = 2
 
-curvature_left=int(measure_curvature_real()[0])
-curvature_right=int(measure_curvature_real()[1])
-
-cv2.putText(result,'Curvature (left,right)= ('+str(curvature_left)+','+str(curvature_right)+')', 
-    bottomLeftCornerOfText, 
-    font, 
-    fontScale,
-    fontColor,
-    lineType)
 
 plt.imshow(result)
 
