@@ -34,4 +34,11 @@ ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
 
 undistored = cv2.undistort(img, mtx, dist, None, mtx)
 
+f, (ax1, ax2) = plt.subplots(1, 2, figsize=(20,10))
+ax1.set_title('undistored')
+ax1.imshow(img_undistort)
+ax2.set_title('original distorted')
+ax2.imshow(img_read, cmap='gray')
+
+
 np.save("camera_calibration", [dist, mtx])
