@@ -344,7 +344,6 @@ def search_around_poly(binary_warped):
 
 result, left_fitx, right_fitx, ploty = search_around_poly(img_bird_eye_warped)
 
-
 def measure_curvature_real():
     '''
     Calculates the curvature of polynomial functions in meters.
@@ -369,6 +368,29 @@ def measure_curvature_real():
                             right_fit_cr[1])**2)**1.5) / np.absolute(2 * right_fit_cr[0])
 
     return left_curverad, right_curverad
+
+def measure_lane_offset():
+    '''
+    Calculates the curvature of polynomial functions in meters.
+    '''
+    img_num_x_pixels=1280
+    # Define conversions in x and y from pixels space to meters
+    ym_per_pix = 30 / 720  # meters per pixel in y dimension
+    xm_per_pix = 3.7 / 700  # meters per pixel in x dimension
+    perfect_lane_x_pos_m=img_num_x_pixels*xm_per_pix
+
+    # Start by generating our fake example data
+    # Make sure to feed in your real data instead in your project!
+    left_fit_cr = np.polyfit(ploty * ym_per_pix, left_fitx * xm_per_pix, 2)
+    right_fit_cr = np.polyfit(ploty * ym_per_pix, right_fitx * xm_per_pix, 2)
+    # Define y-value where we want radius of curvature
+    # We'll choose the maximum y-value, corresponding to the bottom of the
+    # image
+    left_lane_location_x = np.polyval(left_fit_cr, np.max(ploty)*ym_per_pix)
+    right_lane_location_x=np.polyval(right_fit_cr, np.max(ploty)*ym_per_pix)
+
+
+    return (left_lane_location_x+right_lane_location_x)/2-perfect_lane_x_pos_m/2
 
 
 left_curverad, right_curverad = measure_curvature_real()
@@ -506,6 +528,14 @@ def process_image(img_read):
     
     cv2.putText(result,'Curvature (left,right) (m)= ('+str(curvature_left)+','+str(curvature_right)+')', 
         bottomLeftCornerOfText, 
+        font, 
+        fontScale,
+        fontColor,
+        lineType)
+    
+    
+    cv2.putText(result,f'Lane Offset (left-,right+) (m)= {measure_lane_offset():.2f}' , 
+        (10,300), 
         font, 
         fontScale,
         fontColor,
