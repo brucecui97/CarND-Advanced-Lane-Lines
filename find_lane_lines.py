@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import numpy as np
 import cv2
@@ -6,12 +6,8 @@ import matplotlib.pyplot as plt
 import glob
 from gradient_threshold import abs_sobel_thresh, mag_thresh, dir_threshold
 
-# =============================================================================
-# images = glob.glob(
-#     "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/test_images/*.jpg")
-# =============================================================================
 images = glob.glob(
-    "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/frame0.jpg")
+    "./test_images/test6.jpg")
 img_read = cv2.cvtColor(cv2.imread(images[0]), cv2.COLOR_BGR2RGB)
 
 
@@ -29,18 +25,6 @@ hls = cv2.cvtColor(img_undistort, cv2.COLOR_RGB2HLS)
 h = hls[:,:,0]
 l = hls[:,:,1]
 s = hls[:,:,2]
-
-# =============================================================================
-# f, (ax1, ax2, ax3, ax4) = plt.subplots(1, 4, figsize=(20,10))
-# ax1.set_title('Standardized image')
-# ax1.imshow(img_undistort)
-# ax2.set_title('H channel')
-# ax2.imshow(h, cmap='gray')
-# ax3.set_title('L channel')
-# ax3.imshow(l, cmap='gray')
-# ax4.set_title('S channel')
-# ax4.imshow(s, cmap='gray')
-# =============================================================================
 
 
 binary_sobelx = abs_sobel_thresh(s, 'x', 20, 100)
@@ -224,18 +208,6 @@ def fit_polynomial(binary_warped):
     out_img[lefty, leftx] = [255, 0, 0]
     out_img[righty, rightx] = [0, 0, 255]
 
-    # Plots the left and right polynomials on the lane lines
-
-# =============================================================================
-#     plt.plot(left_fitx, ploty, color='red')
-#     plt.plot(right_fitx, ploty, color='red')
-#     
-#     picture=np.zeros_like(img_read)
-#     picture[lefty.astype(int),leftx.astype(int)]=[255,255,255]
-#     picture[righty.astype(int),rightx.astype(int)]=[255,255,255]
-#     plt.imshow(picture)
-# =============================================================================
-
 
     return out_img, left_fit, right_fit, ploty ,left_fitx, right_fitx
 
@@ -332,12 +304,6 @@ def search_around_poly(binary_warped):
     cv2.fillPoly(window_img, np.int_([right_line_pts]), (0, 255, 0))
     result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
 
-    # Plot the polynomial lines onto the image
-# =============================================================================
-#     plt.plot(left_fitx, ploty, color='yellow')
-#     plt.plot(right_fitx, ploty, color='yellow')
-# =============================================================================
-    ## End visualization steps ##
 
     return result, left_fitx, right_fitx, ploty
 
@@ -541,12 +507,6 @@ def process_image(img_read):
         fontColor,
         lineType)
     return result
-# =============================================================================
-# b=np.dstack((img_bird_eye_warped,img_bird_eye_warped,img_bird_eye_warped))
-#
-# img_bird_eye_warped[ploty_pix,left_pix]=[0]
-# =============================================================================
-#
 
 result=process_image(img_read)
 
@@ -555,20 +515,5 @@ result=process_image(img_read)
 plt.imshow(result)
 
 
-
-
-
-# =============================================================================
-# import cv2
-# vidcap = cv2.VideoCapture('project_video.mp4')
-# success,image = vidcap.read()
-# count = 0
-# while success:
-#   cv2.imwrite("frame%d.jpg" % count, image)     # save frame as JPEG file      
-#   success,image = vidcap.read()
-#   print('Read a new frame: ', success)
-#   count += 1
-# 
-# =============================================================================
 
 
