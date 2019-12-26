@@ -8,9 +8,9 @@ vid_output = 'project_video_out.mp4'
  
 clip1 = VideoFileClip("project_video.mp4")
 white_clip = clip1.fl_image(process_image) #NOTE: this function expects color images!!
-%time white_clip.write_videofile(vid_output, audio=False)
+#%time white_clip.write_videofile(vid_output, audio=False)
 
 clip2 = VideoFileClip("project_video.mp4").subclip(39,42)
 white_clip = clip2.fl_image(process_image) #NOTE: this function expects color images!!
-%time white_clip.write_videofile("projecet_out_snip.mp4", audio=False)
+#%time white_clip.write_videofile("projecet_out_snip.mp4", audio=False)
  
