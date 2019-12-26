@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import glob
-from helper import abs_sobel_thresh, mag_thresh, dir_threshold,hist, find_lane_pixels, fit_polynomial,fit_poly
+from helper import abs_sobel_thresh, mag_thresh, dir_threshold,hist, find_lane_pixels, fit_polynomial,fit_poly,search_around_poly
 
 images = glob.glob(
     "./data/test_images/test6.jpg")
@@ -82,14 +82,7 @@ left_lane_inds = []
 right_lane_inds = []
 
 
-
-
-
 out_img, left_fit, right_fit, ploty ,left_fitx, right_fitx = fit_polynomial(img_bird_eye_warped)
-
-plt.imshow(out_img)
-
-
 
 
 def search_around_poly(binary_warped):
@@ -323,7 +316,6 @@ def process_image(img_read):
         left_fitx_list=left_fitx_list[1:,:]
         right_fitx_list=right_fitx_list[1:,:]
     
-       
     except:
         pass
     
@@ -371,9 +363,6 @@ def process_image(img_read):
     return result
 
 result=process_image(img_read)
-
-
-
 plt.imshow(result)
 
 
