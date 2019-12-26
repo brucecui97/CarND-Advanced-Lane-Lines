@@ -4,16 +4,16 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import glob
-from gradient_threshold import abs_sobel_thresh, mag_thresh, dir_threshold
+from helper import abs_sobel_thresh, mag_thresh, dir_threshold,hist
 
 images = glob.glob(
-    "./test_images/test6.jpg")
+    "./data/test_images/test6.jpg")
 img_read = cv2.cvtColor(cv2.imread(images[0]), cv2.COLOR_BGR2RGB)
 
 
-dist_coef, dist_mat = np.load("camera_calibration.npy", allow_pickle=True)
-persp_transform_mat = np.load("mat_persp_transform.npy", allow_pickle=True)
-persp_transform_mat_inv = np.load("mat_persp_transform_back.npy", allow_pickle=True)
+dist_coef, dist_mat = np.load("./data/camera_calibration.npy", allow_pickle=True)
+persp_transform_mat = np.load("./data/mat_persp_transform.npy", allow_pickle=True)
+persp_transform_mat_inv = np.load("./data/mat_persp_transform_back.npy", allow_pickle=True)
 
 img_undistort = cv2.undistort(img_read, dist_mat, dist_coef, None, dist_mat)
 img_size = (img_undistort.shape[1], img_undistort.shape[0])
@@ -46,16 +46,7 @@ img_bird_eye_warped = cv2.warpPerspective(
 
 #plt.imshow(img_bird_eye_warped)
 
-def hist(img):
-    # Grab only the bottom half of the image
-    # Lane lines are likely to be mostly vertical nearest to the car
-    bottom_half = img[img.shape[0] // 2:, :]
 
-    # Sum across image pixels vertically - make sure to set an `axis`
-    # i.e. the highest areas of vertical lines should be larger values
-    histogram = np.sum(bottom_half, axis=0)
-
-    return histogram
 
 
 histogram = np.sum(
