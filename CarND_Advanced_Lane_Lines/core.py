@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import glob
-from helper import abs_sobel_thresh, mag_thresh, dir_threshold,hist, find_lane_pixels, fit_polynomial,fit_poly,search_around_poly
+from CarND_Advanced_Lane_Lines.helper import abs_sobel_thresh, mag_thresh, dir_threshold,hist, find_lane_pixels, fit_polynomial,fit_poly,search_around_poly
 
 images = glob.glob(
     "./data/test_images/test6.jpg")
@@ -215,8 +215,6 @@ def measure_lane_offset():
 
 
 left_curverad, right_curverad = measure_curvature_real()
-
-print(left_curverad, 'm', right_curverad, 'm')
 
 #
 img_bird_eye_warped_zero = np.zeros_like(img_bird_eye_warped).astype(np.uint8)
