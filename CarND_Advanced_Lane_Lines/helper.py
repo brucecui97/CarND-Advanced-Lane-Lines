@@ -9,7 +9,8 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import glob
-images=glob.glob("/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/test_images/str*.jpg")
+images = glob.glob(
+    "/home/bruce/Education/Udacity/CarND-Advanced-Lane-Lines/test_images/str*.jpg")
 
 
 def abs_sobel_thresh(gray, orient='x', thresh_min=0, thresh_max=255):
@@ -26,10 +27,12 @@ def abs_sobel_thresh(gray, orient='x', thresh_min=0, thresh_max=255):
     # Create a copy and apply the threshold
     binary_output = np.zeros_like(scaled_sobel)
     # Here I'm using inclusive (>=, <=) thresholds, but exclusive is ok too
-    binary_output[(scaled_sobel >= thresh_min) & (scaled_sobel <= thresh_max)] = 1
+    binary_output[(scaled_sobel >= thresh_min) &
+                  (scaled_sobel <= thresh_max)] = 1
 
     # Return the result
     return binary_output
+
 
 def mag_thresh(gray, sobel_kernel=3, mag_thresh=(0, 255)):
     # Convert to grayscale
@@ -40,8 +43,8 @@ def mag_thresh(gray, sobel_kernel=3, mag_thresh=(0, 255)):
     # Calculate the gradient magnitude
     gradmag = np.sqrt(sobelx**2 + sobely**2)
     # Rescale to 8 bit
-    scale_factor = np.max(gradmag)/255 
-    gradmag = (gradmag/scale_factor).astype(np.uint8) 
+    scale_factor = np.max(gradmag)/255
+    gradmag = (gradmag/scale_factor).astype(np.uint8)
     # Create a binary image of ones where threshold is met, zeros otherwise
     binary_output = np.zeros_like(gradmag)
     binary_output[(gradmag >= mag_thresh[0]) & (gradmag <= mag_thresh[1])] = 1
@@ -49,20 +52,22 @@ def mag_thresh(gray, sobel_kernel=3, mag_thresh=(0, 255)):
     # Return the binary image
     return binary_output
 
+
 def dir_threshold(gray, sobel_kernel=3, thresh=(0, np.pi/2)):
     # Grayscale
     #gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     # Calculate the x and y gradients
     sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
     sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
-    # Take the absolute value of the gradient direction, 
+    # Take the absolute value of the gradient direction,
     # apply a threshold, and create a binary image result
     absgraddir = np.arctan2(np.absolute(sobely), np.absolute(sobelx))
-    binary_output =  np.zeros_like(absgraddir)
+    binary_output = np.zeros_like(absgraddir)
     binary_output[(absgraddir >= thresh[0]) & (absgraddir <= thresh[1])] = 1
 
     # Return the binary image
     return binary_output
+
 
 def hist(img):
     # Grab only the bottom half of the image
@@ -74,6 +79,7 @@ def hist(img):
     histogram = np.sum(bottom_half, axis=0)
 
     return histogram
+
 
 def find_lane_pixels(binary_warped):
     # Take a histogram of the bottom half of the image
@@ -190,8 +196,8 @@ def fit_polynomial(binary_warped):
     out_img[lefty, leftx] = [255, 0, 0]
     out_img[righty, rightx] = [0, 0, 255]
 
+    return out_img, left_fit, right_fit, ploty, left_fitx, right_fitx
 
-    return out_img, left_fit, right_fit, ploty ,left_fitx, right_fitx
 
 def fit_poly(img_shape, leftx, lefty, rightx, righty):
      ### TO-DO: Fit a second order polynomial to each with np.polyfit() ###
@@ -204,6 +210,7 @@ def fit_poly(img_shape, leftx, lefty, rightx, righty):
     right_fitx = right_fit[0] * ploty**2 + right_fit[1] * ploty + right_fit[2]
 
     return left_fitx, right_fitx, ploty
+
 
 def search_around_poly(binary_warped):
     # HYPERPARAMETER
@@ -278,6 +285,5 @@ def search_around_poly(binary_warped):
     cv2.fillPoly(window_img, np.int_([left_line_pts]), (0, 255, 0))
     cv2.fillPoly(window_img, np.int_([right_line_pts]), (0, 255, 0))
     result = cv2.addWeighted(out_img, 1, window_img, 0.3, 0)
-
 
     return result, left_fitx, right_fitx, ploty
