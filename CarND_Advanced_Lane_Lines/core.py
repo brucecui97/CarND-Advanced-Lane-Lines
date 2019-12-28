@@ -372,6 +372,3 @@ def process_image(img_read):
                 lineType)
     return result
 
-
-result = process_image(img_read)
-plt.imshow(result)
