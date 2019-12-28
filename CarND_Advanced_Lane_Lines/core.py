@@ -371,4 +371,3 @@ def process_image(img_read):
                 fontColor,
                 lineType)
     return result
-
